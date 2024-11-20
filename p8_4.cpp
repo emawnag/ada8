@@ -20,13 +20,14 @@ using namespace std;
 #define AR "@AR@"
 #define AL "@AL@"
 
-map<string, int> nodeHeight;
+map<string, long long> nodeHeight;
 
-string nodeHtml(){
+string nodeHtml()
+{
     string ans = "";
     for (const auto &obj : nodeHeight)
     {
-        ans += "\"" + obj.first + "\" [label=" + AL + AL + "TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"" + AR + AL + "TR" + AR + AL + "TD" + AR + obj.first + AL + "/TD" + AR + AL + "/TR" + AR + AL + "TR" + AR + AL + "TD" + AR + to_string(obj.second) + AL + "/TD" + AR + AL + "/TR" + AR + AL + "/TABLE" + AR+ AR + "];" + NL;
+        ans += "\"" + obj.first + "\" [label=" + AL + AL + "TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"" + AR + AL + "TR" + AR + AL + "TD" + AR + obj.first + AL + "/TD" + AR + AL + "/TR" + AR + AL + "TR" + AR + AL + "TD" + AR + to_string(obj.second) + AL + "/TD" + AR + AL + "/TR" + AR + AL + "/TABLE" + AR + AR + "];" + NL;
     }
     return ans;
 }
@@ -47,7 +48,7 @@ string Generate_Graphviz(const map<string, tuple<vector<string>, int>> &makefile
         }
     }
 
-    outfile <<nodeHtml()<< "}" << NL;
+    outfile << nodeHtml() << "}" << NL;
 
     return outfile.str();
 }
@@ -116,24 +117,28 @@ bool ends_with_cpp(const std::string &str)
     return str.size() >= 4 && str.compare(str.size() - 4, 4, ".cpp") == 0;
 }
 
+long long maxLove = 0;
 
-void computeHeight(const map<string, tuple<vector<string>, int>> &mf, string name, int ih)
+void computeHeight(const map<string, tuple<vector<string>, int>> &mf, string name, long long ih)
 {
     if (nodeHeight.find(name) != nodeHeight.end())
     {
-       nodeHeight[name] = nodeHeight[name]>ih?nodeHeight[name]:ih;
+        nodeHeight[name] = nodeHeight[name] > ih ? nodeHeight[name] : ih;
     }
     else
     {
         nodeHeight[name] = ih;
     }
 
-    if(ends_with_cpp(name)){
-        return;
-    }else{
+    if (ends_with_cpp(name))
+    {
+        maxLove = max(maxLove, nodeHeight[name]);
+    }
+    else
+    {
         for (const auto &dep : get<0>(mf.at(name)))
         {
-            computeHeight(mf, dep, ih +1);
+            computeHeight(mf, dep, ih + get<1>(mf.at(name)));
         }
     }
 }
@@ -163,5 +168,5 @@ long long Minimum_Build_Time(vector<tuple<string, vector<string>, int>> &makefil
     string visual = base64_encode(Generate_Graphviz(makefile_copy));
     WLOG(visual);
 
-    return 0;
+    return maxLove;
 }
