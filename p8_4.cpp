@@ -24,15 +24,17 @@ long long maxLove = 0;
 
 void computeHeight(const map<string, tuple<vector<string>, int>> &mf, string name, long long ih)
 {
+    bool earlyReturn = false;
     if (nodeHeight.find(name) != nodeHeight.end())
     {
-        nodeHeight[name] = nodeHeight[name] > ih ? nodeHeight[name] : ih;
+        earlyReturn = nodeHeight[name] > ih;
+        nodeHeight[name] = earlyReturn ? nodeHeight[name] : ih;
     }
     else
     {
         nodeHeight[name] = ih;
     }
-
+if(earlyReturn) return;
     if (ends_with_cpp(name))
     {
         maxLove = max(maxLove, nodeHeight[name]);
@@ -48,7 +50,7 @@ void computeHeight(const map<string, tuple<vector<string>, int>> &mf, string nam
 
 long long Minimum_Build_Time(vector<tuple<string, vector<string>, int>> &makefile)
 {
-    nodeHeight["root"] = 0;
+    //nodeHeight["root"] = 0;
     map<string, tuple<vector<string>, int>> makefile_copy;
     for (const auto &obj : makefile)
     {
